@@ -67,7 +67,7 @@ export default function RootLayout() {
     const inAuth = segments[0] === 'auth'; // rutas /auth/*
     if (!isAuthed) {
       // Si no hay sesión: solo permitimos /auth/*
-      if (!inAuth) router.replace('/auth');
+      if (!inAuth) router.replace('/auth/sign-up');
       return;
     }
 
