@@ -59,33 +59,34 @@ export default function RootLayout() {
       sub.subscription.unsubscribe();
     };
   }, []);
+  
+  
+useEffect(() => {
+  if (bootLoading || isAuthed === null) return;
 
-  // Redirecciones
-  useEffect(() => {
-    if (bootLoading || isAuthed === null) return;
+  const inAuth = segments[0] === 'auth';
+  const isRoot = segments.length === 0;
 
-    const inAuth = segments[0] === 'auth'; // rutas /auth/*
-    if (!isAuthed) {
-  // Si no hay sesión: vamos al index antiguo
-  if (segments.length > 0) router.replace('/');
-  return;
+  if (!isAuthed) {
+    // ✅ Permitir / (landing) y /auth/* sin sesión
+    if (!isRoot && !inAuth) router.replace('/');
+    return;
+  }
 
-    }
+  // Con sesión: si está en /auth/*, envía a su home por rol
+  if (inAuth) {
+    if (role === 'coach') router.replace('/home/coach');
+    else router.replace('/home/usuario');
+    return;
+  }
 
-    // Con sesión: si está en /auth/*, lo mandamos a su home por rol
-    if (inAuth) {
-      if (role === 'coach') router.replace('/home/coach');
-      else router.replace('/home/usuario');
-      return;
-    }
+  // Si intenta entrar a la home del otro rol, reenvía a la suya
+  const inCoach = segments.includes('coach');
+  const inUser = segments.includes('usuario');
+  if (role === 'coach' && inUser) router.replace('/home/coach');
+  if (role === 'usuario' && inCoach) router.replace('/home/usuario');
+}, [bootLoading, isAuthed, role, segments]);
 
-    // Si intenta entrar a la home del otro rol, lo mandamos a la suya
-    const inCoach = segments.includes('coach');
-    const inUser = segments.includes('usuario');
-
-    if (role === 'coach' && inUser) router.replace('/home/coach');
-    if (role === 'usuario' && inCoach) router.replace('/home/usuario');
-  }, [bootLoading, isAuthed, role, segments]);
 
   if (bootLoading) {
     return (
